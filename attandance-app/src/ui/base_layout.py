@@ -8,12 +8,6 @@ def style_background_home():
                 .stApp{
                 background:#2B2D31 !important
                 }
-                #MainMenu,footer,header{
-                   visibility:hidden;
-                }
-                .block-container{
-                    padding-top:1.5rem !important;
-                }
                 .stApp div[data-testid="stColumn"] {
                     background-color: #E0E3FF !important;
                     padding: 2.5rem !important;
@@ -29,12 +23,6 @@ def style_background_dashboard():
         <style>
                 .stApp{
                 background:#2B2D31 !important
-                }
-                #MainMenu,footer,header{
-                   visibility:hidden;
-                }
-                .block-container{
-                    padding-top:1.5rem !important;
                 }
        </style>
     """,unsafe_allow_html=True)

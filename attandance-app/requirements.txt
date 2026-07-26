@@ -13,3 +13,6 @@ segno
 pillow
 
 streamlit
+
+librosa  #This lib is to rec a voise or to store a voice 
+resemblyzer #This lib actually compaires 2 voices and check saame or not

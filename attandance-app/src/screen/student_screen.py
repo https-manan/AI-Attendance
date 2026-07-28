@@ -1,4 +1,5 @@
-from src.database.db import get_all_students
+from src.components.dialog_enroll import enroll_dialog
+from src.database.db import get_all_students,get_students_subjects,get_student_attandace
 from src.pipelines.face_pipeline import get_face_embeddings, predict_attandace
 from src.pipelines.voice_pipeline import get_voice_embedding
 import streamlit as st
@@ -9,8 +10,58 @@ import numpy as np
 
 show_registration=False 
 def student_dashboard():
-    st.header("Dashboard here")
+    student_data=st.session_state.student_data
+    student_id=student_data['student_id']
+    c1,c2=st.columns(2,vertical_alignment='center',gap='xxlarge')
+    with c1:
+        header_dashbard()
+    with c2:
+        st.subheader(f"Welcome,{student_data['name']}") 
+        if st.button("Logout",type='secondary',key='loginbackbtn',shortcut="control+backspace"):
+            st.session_state['is_logged_in']=False
+            del st.session_state.teacher_data
+            st.rerun()
+    st.space()
+    c1,c2=st.columns(2)
+    with c1:
+        st.header('Your enrolled subjects')
+    with c2:
+        if st.button("Enrolled in subject",type='primary',width='stretch'):
+            enroll_dialog()
 
+    st.divider()
+
+    with st.spinner("Loding your enrolled subjects.."):
+        subjects=get_students_subjects(student_id)
+        logs=get_student_attandace(student_id)
+
+    stats_map={}
+    for log in logs:
+        sid=log['subject_id']
+        if sid not in stats_map:
+            stats_map[sid]={"total":0,"attended":0}
+        stats_map[sid]['total']+=1
+        if logs.get('is_present'):
+            stats_map[sid]['attanded']+=1
+
+    cols = st.columns(2)
+    for i, sub_node in enumerate(subjects):
+        sub = sub_node['subjects']
+        sid = sub['subject_id']
+
+
+        stats = stats_map.get(sid,{"total":0, "attended": 0} )
+
+        with cols[i % 2]:
+            subject_card(
+                name = sub['name'],
+                code =sub['subject_code'],
+                section = sub['section'],
+                stats = [
+                    ('📋', 'Total', stats['total']),
+                    ('✅', 'Attended', stats['attended']),
+                ]
+            )
 
 def student_screen():
     style_background_dashboard()

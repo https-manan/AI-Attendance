@@ -1,0 +1,24 @@
+import streamlit as st
+from src.database.db import create_subject
+
+import segno
+import io
+
+@st.dialog("Create Class Link")
+def create_subject_dialog(subject_name,subject_code):
+    app_domain="https://localhoast:8501/"
+    join_url=f"{app_domain}/?join_code={subject_code}"
+    st.header("Scan to join")
+    qr=segno.make(join_url) #to iss url ka ek QR code bn jayga 
+    out=io.BytesIO
+    qr.save(out,kind='png',scale=10,border=1)
+    col1,col2=st.columns(2)
+    with col1:
+        st.markdown('### copy link')
+        st.code(join_url,language="text")
+        st.code(subject_code,language="text")
+        st.info("Copy this link to share")
+    with col2:
+        st.markdown('### Scan to join')
+        st.image(out.getvalue(),use_column_width=True,caption="QR Code for class joining")
+

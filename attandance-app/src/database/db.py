@@ -1,11 +1,13 @@
 from src.database.config import supabase
 import bcrypt 
 
+#All teacher tings 
+#---------------------
 def hash_pass(password):
-    return bcrypt.hashpw(password.encode(),bcrypt.gensalt).decode()
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-def check_pass(psw,hashed):
-    return bcrypt.checkpw(psw.encode(),hashed.encode())
+def check_pass(psw, hashed):
+    return bcrypt.checkpw(psw.encode(), hashed.encode())
 
 
 def check_teacher_exists(username):
@@ -26,6 +28,11 @@ def teacher_login(username,password):
             return teacher
         return None
 
+
+
+
+#All students tings 
+#---------------------
 
 def get_all_students():
     res=supabase.table("students").select("*").execute()

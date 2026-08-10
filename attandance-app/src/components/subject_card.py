@@ -68,7 +68,11 @@ def subject_card(name, code, section, stats=None, footer_callback=None):
             """
         html += "</div>"
     html += "</div>"
-    st.markdown(html, unsafe_allow_html=True)
+
+    #jo leading spaces hai har line ke start mai unko hata rahe hai warna markdown parser
+    #4+ space indent ko code block samajh leta hai and raw HTML tags text ki tarha dikhne lagte hai
+    clean_html = "\n".join(line.lstrip() for line in html.splitlines())
+    st.markdown(clean_html, unsafe_allow_html=True)
 
     if footer_callback:
         footer_callback()

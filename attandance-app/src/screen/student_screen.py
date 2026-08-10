@@ -1,10 +1,11 @@
 from src.components.dialog_enroll import enroll_dialog
-from src.database.db import get_all_students,create_student,get_student_subject,get_student_attendance
+from src.database.db import get_all_students,create_student,get_student_subject,get_student_attendance,unenroll_student_to_sub
 from src.pipelines.face_pipeline import get_face_embeddings, predict_attandace,train_classifier
 from src.pipelines.voice_pipeline import get_voice_embedding
 import streamlit as st
 from src.ui.base_layout import style_background_dashboard, style_base_layout
 from src.components.header import header_dashbard
+from src.components.subject_card import subject_card
 import numpy as np
 from PIL import Image
 import time
@@ -24,7 +25,7 @@ def student_dashboard():
     st.space()
 
 
-    c1,c1=st.columns(2)
+    c1,c2=st.columns(2)
     with c1:
         st.header('Your enrolled subjects')
     with c2:
@@ -47,11 +48,33 @@ def student_dashboard():
             status_map[sub_id]={'total':0,'attended':0}
 
         status_map[sub_id]['total']+=1  #means class hui hai us sub ki
-        if attendance_logs.get('is_present'):
+        if log.get('is_present'):
             status_map[sub_id]['attended']+=1  #means attended the class
 
     cols=st.columns(2)
+    for i,sub_node in enumerate(subjects):
+        sub=sub_node['subjects']
+        sub_id=sub['subject_id']
 
+        stats=status_map.get(sub_id,{'total':0,'attended':0})
+        def unenroll_btn(sub_id=sub_id):
+            if st.button("Unenroll from this course",type='tertiary',key=f'unenroll_{sub_id}'):
+                unenroll_student_to_sub(st.session_state.student_data['student_id'],sub_id)
+                st.toast("Unenrolled from subject")
+                st.rerun()
+                
+
+        with cols[i%2]:
+            subject_card(
+                name=sub['name'],
+                code=sub['subject_code'],
+                section=sub['section'],
+                stats=(
+                    ('🏛️','Total',stats['total']),
+                    ('✅','Attended',stats['attended']),
+                ),
+                footer_callback=unenroll_btn
+            )
 
 
 def student_screen():
@@ -83,7 +106,7 @@ def student_screen():
         img = np.array(Image.open(photo))
 
         with st.spinner("Scanning...."):
-            detected, all_ids, no_faces = predict_attandace(img)  #the func we defien in face_rec that retrun detected,there ids and number of faces
+            detected, all_ids, no_faces = predict_attandace(img)  #the func we define in face_rec that retrun detected,there ids and number of faces
             if no_faces == 0:
                 st.warning("Face not found!")
                 st.info("Coudent find a face in the photo, you can still register below if you're new")  #agar face detect na ho tab bhi register ka option milna chahiye
@@ -143,7 +166,7 @@ def student_screen():
                                     time.sleep(1)
                                     st.rerun()
                             else:
-                                st.error("Coudent capture your faceial features")  #yahan pe face not found tha isliye embeddings nai bane, retake bolna chahiye
+                                st.error("Coudent capture your faceial features")  #yahan pe face not found tha isliye embeddings nai bane
                     else:
                         st.warning("Please capture your face again.")
                 else:

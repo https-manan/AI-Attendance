@@ -50,16 +50,16 @@ def create_subject(subject_code,name,section,teacher_id):
     return res.data
 
 def get_teacher_subjects(teacher_id):
-    res=supabase.table('subjects').select('*,subject_students(count),attandance_logs(timestamp)').eq("teacher_id",teacher_id).execute()
-    subject=res.data
+    res=supabase.table('subjects').select('*,subject_students(count),attendance_logs(timestamp)').eq("teacher_id",teacher_id).execute()
+    subjects=res.data
 
-    for sub in subject():                                               #this 0 is the fallback like count nahi hai to 0
-        sub['total_students']=sub.get("subject_student",[{}])[0].get('count',0)if sub.get('subject_students')else 0      #this [{}] is fall back ki agar nahi mila so we return empty 
-        attandance=sub.get('attandance_logs',[])#this [] is fallback
-        unique_session=len(set(log['timestamp'] for log in attandances))#Timestamp ke basis pr unique means unque lectures means basically group by same time coz same time pe 1 he lecture possible hai 
+    for sub in subjects:                                               #this 0 is the fallback like count nahi hai to 0
+        sub['total_students']=sub.get("subject_students",[{}])[0].get('count',0)if sub.get('subject_students')else 0      #this [{}] is fall back ki agar nahi mila so we return empty 
+        attendance=sub.get('attendance_logs',[])#this [] is fallback
+        unique_session=len(set(log['timestamp'] for log in attendance))#Timestamp ke basis pr unique means unque lectures means basically group by same time coz same time pe 1 he lecture possible hai 
         sub['total_classes']=unique_session #Classes on basis of unique session
-        sub.pop('subject_student',None)   #Removing else things     
-        sub.pop('attandance_logs',None)
+        sub.pop('subject_students',None)   #Removing else things     
+        sub.pop('attendance_logs',None)
          
     return subjects
 
@@ -81,4 +81,3 @@ def get_student_subject(student_id):
 def get_student_attendance(student_id):
     response = supabase.table('attendance_logs').select('*, subjects(*)').eq('student_id', student_id).execute()
     return response.data
-

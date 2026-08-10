@@ -12,11 +12,11 @@ import io
 
 @st.dialog("Share Class Link")
 def share_subject_dialog(subject_name,subject_code):
-    app_domain="https://localhoast:8501/"   #after deploying URL of the deployed URL here
+    app_domain="https://localhost:8501"   #after deploying URL of the deployed URL here
     join_url=f"{app_domain}/?join_code={subject_code}"  #Basically creating a URL for QR code
     st.header("Scan to join")
     qr=segno.make(join_url) #to iss url ka ek QR code bn jayga using segno library
-    out=io.BytesIO          #This is for ki jo QR code image bni hai we gonna store that in RAM itself koi file vagera m store nahi krenge
+    out=io.BytesIO()          #This is for ki jo QR code image bni hai we gonna store that in RAM itself koi file vagera m store nahi krenge
     qr.save(out,kind='png',scale=10,border=1)
     col1,col2=st.columns(2)
     with col1:
@@ -26,5 +26,4 @@ def share_subject_dialog(subject_name,subject_code):
         st.info("Copy this link to share")
     with col2:
         st.markdown('### Scan to join')
-        st.image(out.getvalue(),use_column_width=True,caption="QR Code for class joining")
-
+        st.image(out.getvalue(),use_container_width=True,caption="QR Code for class joining")

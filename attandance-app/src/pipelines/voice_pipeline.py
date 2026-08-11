@@ -16,7 +16,7 @@ def get_voice_embedding(audio_bytes):  #audio_bytes means audio ka binary
         encoder=load_voice_encoder()
         audio,sr=librosa.load(io.BytesIO(audio_bytes),sr=16000) #librosa return 2 things audio and sample rate
         wav=preprocess_wav(audio)      #preprocess_wev is to cleaning the audio  
-        embedding=encoder.ember_utterance(wav)  #cleaned audio(wav) file daalte haai to ye embeeddings de deta hai
+        embedding=encoder.embed_utterance(wav)  #cleaned audio(wav) file daalte haai to ye embeeddings de deta hai
         return embedding.tolist()#image vale mai 128D tha idhr 256D mai embedd hua hai
     
     except Exception as e:

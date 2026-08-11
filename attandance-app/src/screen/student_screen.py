@@ -1,7 +1,7 @@
 from src.components.dialog_enroll import enroll_dialog
-from src.database.db import get_all_students,create_student,get_student_subject,get_student_attendance,unenroll_student_to_sub
 from src.pipelines.face_pipeline import get_face_embeddings, predict_attandace,train_classifier
 from src.pipelines.voice_pipeline import get_voice_embedding
+from src.database.db import get_all_students,create_student,get_student_subject,get_student_attendance,unenroll_student_to_sub
 import streamlit as st
 from src.ui.base_layout import style_background_dashboard, style_base_layout
 from src.components.header import header_dashbard
@@ -39,9 +39,7 @@ def student_dashboard():
         attendance_logs=get_student_attendance(st.session_state.student_data['student_id'])
 
     #status map mai we gonna store har sub mai kun kaun students enrolled hai and unhone kitni classes kri hai 
-    status_map={
-
-    }
+    status_map={}
     for log in attendance_logs:
         sub_id=log['subject_id']
         if sub_id not in status_map:
@@ -106,7 +104,7 @@ def student_screen():
         img = np.array(Image.open(photo))
 
         with st.spinner("Scanning...."):
-            detected, all_ids, no_faces = predict_attandace(img)  #the func we define in face_rec that retrun detected,there ids and number of faces
+            detected, all_ids, no_faces = predict_attandace(img)  #the func we define in face_rec that return detected,there ids and number of faces
             if no_faces == 0:
                 st.warning("Face not found!")
                 st.info("Coudent find a face in the photo, you can still register below if you're new")  #agar face detect na ho tab bhi register ka option milna chahiye

@@ -1,7 +1,7 @@
 import dlib
 import numpy as np
 import face_recognition_models
-from sklearn.svm import SVC
+from sklearn.svm import SVC  #So when dlib and face_recognition_models detects the face and convert em into numbebs so  after that owr SVM is the one that classifies whose face is this and all  
 import streamlit as st
 from src.database.db import get_all_students
 
@@ -17,7 +17,7 @@ def load_dlib_models():
 
     faceRec=dlib.face_recognition_model_v1(
         face_recognition_models.face_recognition_model_location()      #basically isme bhi hum model pass krte hai in face_recognition_model_v1 for better performance
-    )
+    )                                                                   #And this just to make the embedding of the face not to detect it is done by SVM
 
     return detector,sp,faceRec
 
@@ -26,16 +26,16 @@ def load_dlib_models():
 def get_face_embeddings(image_np):        # basiclly this is to convert the face image in form of vector and num  
     detector,sp,faceRec=load_dlib_models()
 
-    faces=detector(image_np,2)  #Here this 2 number means that 1 image ko kitni baar process krega like 2 means 2 baar from diff angls and pos
+    faces=detector(image_np,2)  #This gonna tell faces ki location kya hai in that group photo and here this 2 number means that 1 image ko kitni baar process krega like 2 means 2 baar from diff angls and pos
 
     encoding=[]
 
-    for face in faces:
-        shape=sp(image_np,face) # this means we are demanding give me all landmarks of this image aand in that image this particulr face like group photo me se is face ke embeddings
+    for face in faces:           #The task of this shape is ki jo image aayi hai image_np mai and face to us face ka saare points like node ka cordinate(x,y) and so on kha hai its gonna mark that in the image_np
+        shape=sp(image_np,face) # this means we are demanding give me all landmarks of this particular face in the image aand in that image this particulr face like group photo me se is face ke landmarks
         face_desc=faceRec.compute_face_descriptor(image_np,shape,1) #To aab ye finally 128 Dimention ki embeddings bna dega finally from the image landmarks for that particular face
         encoding.append(np.array(face_desc))
 
-    return encoding  # basically face ko ek number bna dia and append that in the encoding 
+    return encoding  # basically face ko ek number bna dia and append that in the encoding yha recognize nahi kia h bus embedding bhanyi hai and we recognize later by using SVM
 
 
 
@@ -91,11 +91,11 @@ def predict_attandace(class_image_np):
 
     for encoding in encodings:                #basically yha hum aapne classifier se puch rhe hai ki ye banda grp photo mai hai kya hai to okey varna aage bhadenge 
         if len(all_students) >= 2:
-            predicted_id = int(clf.predict([encoding])[0])
+            predicted_id = int(clf.predict([encoding])[0]) #This means we are asking SVM look and predict which student is this 
         else:
-            predicted_id = int(all_students[0])
+            predicted_id = int(all_students[0])  #Means only 1 student is present in DB 
 
-        student_embedding = X_train[Y_train.index(predicted_id)]
+        student_embedding = X_train[Y_train.index(predicted_id)]#SO aab as the SVM predicted we gonna go in Y_train and get the student with that name or id and get its embedding from x[Y] 
         best_match_score = np.linalg.norm(student_embedding - encoding)
         resemblance_threshold = 0.6
 

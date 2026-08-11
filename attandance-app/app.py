@@ -17,10 +17,10 @@ def main():
             home_screen()
 
 
-    join_code=st.query_params('join-code') #This is how we get the params detail in streamlit 
+    join_code=st.query_params.get('join-code') #This is how we get the params detail in streamlit 
     if join_code:
         if st.session_state.login_type!='student':
-            st.session_state.login_type=='student'
+            st.session_state.login_type='student'
             st.rerun()
         if st.session_state.get('is_logged_in') and st.session_state.get('user_role')=='student':
             auto_enroll_dialog(join_code)

@@ -2,7 +2,7 @@ import streamlit as st
 from src.database.db import enroll_student_to_sub
 import segno
 import io
-import supabase
+from src.database.config import supabase
 import time
 
 
@@ -26,15 +26,15 @@ def auto_enroll_dialog(subject_code):
             st.query_params.clear()
             st.rerun()
         return 
-    st.markdown(f'Would you like to enroll in **{subject['name']}**?')
-    col1,col2=st.column(2)
+    st.markdown(f"Would you like to enroll in **{subject['name']}**?")
+    col1,col2=st.columns(2)
     with col1:
         if st.button("No thanks"):
             st.query_params.clear()
             st.rerun()
          
     with col2:
-        if st.buton('Yes enroll now!',type='primary',width='stretch'):
+        if st.button('Yes enroll now!',type='primary',width='stretch'):
             enroll_student_to_sub(student_id,subject['subject_id'])
             st.success('Joined successfully!')
             st.query_params.clear()

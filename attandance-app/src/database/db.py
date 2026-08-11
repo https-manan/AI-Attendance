@@ -28,6 +28,10 @@ def teacher_login(username,password):
             return teacher
         return None
 
+def get_attendance_for_teacher(teacher_id):
+    res = supabase.table('attendance_logs').select('*, subjects!inner(*)').eq('subjects.teacher_id', teacher_id).execute()
+    return res.data
+
 
 
 

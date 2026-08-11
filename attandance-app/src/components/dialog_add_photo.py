@@ -11,7 +11,7 @@ import time
 def add_photo_dialog():
     st.write('Add classroom photo to scan for attandance')
 
-    if 'photo_tab' not in st.session_state:    #by defaul camera use krenge 
+    if 'photo_tab' not in st.session_state:    #by default camera use krenge 
         st.session_state.photo_tab='camera'
 
     #These 2 tabs for either uploading photo or taking photo

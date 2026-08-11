@@ -1,9 +1,10 @@
+import pandas
 from src.components.dialog_add_photo import add_photo_dialog
 from src.components.dialog_attendance_result import attendance_result_dialog
 from src.components.dialog_voice_attandance import voice_attendance_dialog
 from src.components.dialog_share_subject import share_subject_dialog
 from src.components.dialog_create_subject import create_subject_dialog 
-from src.database.db import teacher_login,check_teacher_exists,create_teacher,get_teacher_subjects
+from src.database.db import get_attendance_for_teacher, teacher_login,check_teacher_exists,create_teacher,get_teacher_subjects
 import streamlit as st
 from src.ui.base_layout import (style_background_dashboard,style_base_layout)
 from src.components.header import header_dashbard
@@ -209,16 +210,27 @@ def teacher_tab_take_attendance():
         with c2:  #This is for actually taking attandance
             if st.button('Run face analysis',width='stretch',type='secondary',icon=':material/analytics:',disabled= not has_photos):
                 with st.spinner("Scanning classroom photos"):
-                    all_detected_ids={}
+                    all_detected_ids={} #This all detected ids gonna store the unique ids of students from all the images uploaded like this
+                                        #{
+                                        #     101: ["Photo 1", "Photo 3"],
+                                        #     102: ["Photo 1"],
+                                        #     105: ["Photo 2", "Photo 4"]
+                                        # }
 
-                    for idx,img in enumerate(st.session_state.attendance_images):
+                    for idx,img in enumerate(st.session_state.attendance_images):  #Go over each photo stored in attendance_img and run face detection
                         img_np=np.array(img.convert('RGB'))  # basically image ko RGB mai convert phale bhi kr skte thae its good for model to understand and all 
                         detected,_,_=predict_attandace(img_np)
                         if detected:
                             for sid in detected.keys():
                                 student_id=int(sid)
                                 all_detected_ids.setdefault(student_id,[]).append(f'Photo {idx+1}')  #jo all_detected_ids bnaya tha uppar usme simplly append the stu_id with images all that are found in the image
-
+                                                                                                    # {
+                                                                                                    #     101: []
+                                                                                                    # }                       To like studnet with id 101 detect hua to uski image store krenge in form of dictionary
+                                                                                                    # .append("Photo 1")
+                                                                                                    # {
+                                                                                                    #     101: ["Photo 1"]
+                                                                                                    # }
                     enrolled_res=supabase.table('subject_students').select('*,students(*)').eq('subject_id',selected_subject_id).execute()  #jo bacche detect hue hai unhe present mark else ko absent mark  
                     enrolled_students=enrolled_res.data
 
@@ -289,4 +301,40 @@ def teacher_tab_manage_subjects():
 
 
 def teacher_tab_attendance_records():
-    pass
+    teacher_id=st.session_state.teacher_data['teacher_id'] #This teacherId is needed to get all the subjects of the teacher and then from it all the attandance logs of all the students in that sub 
+    records=get_attendance_for_teacher(teacher_id)
+
+    if not records:
+        return 
+
+    data=[]
+
+    for r in records:
+        ts=r.get('timestamp')
+        data.append({
+            "ts_group": ts.split(".")[0] if ts else None,
+            "Time": datetime.fromisoformat(ts).strftime("%Y-%m-%d %I:%M %p") if ts else "N/A",
+            "Subject": r['subjects']['name'],
+            "Subject Code": r['subjects']['subject_code'],
+            "is_present": bool(r.get('is_present', False))
+        })
+
+    df=pd.DataFrame(data)
+    summary = (
+        df.groupby(['ts_group', 'Time', 'Subject', 'Subject Code'])
+        .agg(
+            Present_Count=('is_present', 'sum'),
+            Total_Count=('is_present', 'count')
+        ).reset_index()
+    )
+
+    summary['Attendance Stats'] = (
+        "✅ " + summary['Present_Count'].astype(str) + "/"
+        + summary['Total_Count'].astype(str) + ' Students'
+    )
+
+    display_df = (summary.sort_values(by='ts_group',ascending=False)
+                  [['Time','Subject','Subject code','Attendance stats']]
+                  )
+
+    st.dataframe(display_df,width='stretch',hide_index=True)

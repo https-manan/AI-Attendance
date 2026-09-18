@@ -12,7 +12,7 @@ import io
 
 @st.dialog("Share Class Link")
 def share_subject_dialog(subject_name,subject_code):
-    app_domain="https://localhost:8501"   #after deploying URL of the deployed URL here
+    app_domain="classAI-1.streamlit.app"  
     join_url=f"{app_domain}/?join_code={subject_code}"  #Basically creating a URL for QR code
     st.header("Scan to join")
     qr=segno.make(join_url) #to iss url ka ek QR code bn jayga using segno library

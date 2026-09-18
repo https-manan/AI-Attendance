@@ -6,6 +6,7 @@ from src.screen.student_screen import student_screen
 
 
 def main():
+    page_title='ClassRoll AI - making attendance faster'
     if 'login_type' not in st.session_state:
         st.session_state['login_type'] = None
     match st.session_state['login_type']:
